@@ -14,7 +14,7 @@ namespace CRUDOperationUsingWEBAPI.Data
         [MaxLength(50)]
         public string Email { get; set; } = null!;
 
-        [MaxLength(5)]
+        [MaxLength(10)]
         public string Gender { get; set; } = null!;
         public string? Address { get; set; }
     }

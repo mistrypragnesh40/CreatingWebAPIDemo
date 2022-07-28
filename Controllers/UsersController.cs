@@ -1,21 +1,29 @@
 ﻿using CRUDOperationUsingWEBAPI.Data;
 using CRUDOperationUsingWEBAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace CRUDOperationUsingWEBAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class UsersController : ControllerBase
     {
         private readonly UserManager<Users> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public UsersController(UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly IConfiguration _configuration;
+        public UsersController(UserManager<Users> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _configuration = configuration;
         }
 
 
@@ -48,7 +56,7 @@ namespace CRUDOperationUsingWEBAPI.Controllers
             if (userDetails != null)
             {
 
-               var userRoleAssignResponse= await _userManager.AddToRoleAsync(userDetails, assignRoleToUserDTO.RoleName);
+                var userRoleAssignResponse = await _userManager.AddToRoleAsync(userDetails, assignRoleToUserDTO.RoleName);
 
                 if (userRoleAssignResponse.Succeeded)
                 {
@@ -64,7 +72,47 @@ namespace CRUDOperationUsingWEBAPI.Controllers
                 return BadRequest("There are no user exist with this email");
             }
 
-            
+
+        }
+
+        [AllowAnonymous]
+        [HttpPost("AuthenticateUser")]
+        public async Task<IActionResult> AuthenticateUser(AuthenticateUser authenticateUser)
+        {
+            var user = await _userManager.FindByNameAsync(authenticateUser.UserName);
+            if (user == null) return Unauthorized();
+
+            bool isValidUser = await _userManager.CheckPasswordAsync(user, authenticateUser.Password);
+
+            if (isValidUser)
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                var keyDetail = Encoding.UTF8.GetBytes(_configuration["JWT:Key"]);
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.Name, user.Email),
+                };
+
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Audience = _configuration["JWT:Audience"],
+                    Issuer = _configuration["JWT:Issuer"],
+                    Expires = DateTime.UtcNow.AddDays(5),
+                    Subject = new ClaimsIdentity(claims),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyDetail), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                return Ok(tokenHandler.WriteToken(token));
+            }
+            else
+            {
+                return Unauthorized();
+            }
+
         }
 
 

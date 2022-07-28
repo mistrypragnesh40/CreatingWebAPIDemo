@@ -126,6 +126,8 @@ namespace CRUDOperationUsingWEBAPI.Services
                     existingStudent.Address = studentDTO.Address;
                     existingStudent.FirstName = studentDTO.FirstName;
                     existingStudent.LastName = studentDTO.LastName;
+                    existingStudent.Email = studentDTO.Email;
+                    existingStudent.Gender = studentDTO.Gender;
                     await _context.SaveChangesAsync();
 
                     response.IsSuccess = true;

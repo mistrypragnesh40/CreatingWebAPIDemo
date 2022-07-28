@@ -1,10 +1,12 @@
 ﻿using CRUDOperationUsingWEBAPI.Models;
 using CRUDOperationUsingWEBAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CRUDOperationUsingWEBAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class StudentsController : ControllerBase
     {
