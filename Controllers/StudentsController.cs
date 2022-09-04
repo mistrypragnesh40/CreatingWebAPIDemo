@@ -27,7 +27,7 @@ namespace CRUDOperationUsingWEBAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return ErrorResponse.ReturnErrorResponse(ex.Message);
             }
         }
 
@@ -41,7 +41,7 @@ namespace CRUDOperationUsingWEBAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return ErrorResponse.ReturnErrorResponse(ex.Message);
             }
         }
 
@@ -56,7 +56,7 @@ namespace CRUDOperationUsingWEBAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return ErrorResponse.ReturnErrorResponse(ex.Message);
             }
 
         }
@@ -66,19 +66,12 @@ namespace CRUDOperationUsingWEBAPI.Controllers
         {
             try
             {
-                if (studentInfo.StudentID > 0)
-                {
-                    var response = await _studentService.UpdateStudent(studentInfo);
-                    return Ok(response);
-                }
-                else
-                {
-                    return BadRequest("Please pass student ID");
-                }
+                var response = await _studentService.UpdateStudent(studentInfo);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return ErrorResponse.ReturnErrorResponse(ex.Message);
             }
 
         }
@@ -88,21 +81,16 @@ namespace CRUDOperationUsingWEBAPI.Controllers
         {
             try
             {
-                if (studentInfo.StudentID > 0)
-                {
-                    var response = await _studentService.DeleteStudent(studentInfo);
-                    return Ok(response);
-                }
-                else
-                {
-                    return BadRequest("Please pass student ID");
-                }
+                var response = await _studentService.DeleteStudent(studentInfo);
+                return Ok(response);
+
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return ErrorResponse.ReturnErrorResponse(ex.Message);
             }
 
         }
+       
     }
 }

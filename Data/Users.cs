@@ -15,5 +15,7 @@ namespace CRUDOperationUsingWEBAPI.Data
         [MaxLength(6)]
         public string Gender { get; set; } = null!;
         public string? Address { get; set; }
+        public string? RefreshToken { get; set; }
+
     }
 }

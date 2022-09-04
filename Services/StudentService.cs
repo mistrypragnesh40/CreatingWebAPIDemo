@@ -55,6 +55,12 @@ namespace CRUDOperationUsingWEBAPI.Services
             var response = new MainResponse();
             try
             {
+                if (studentDTO.StudentID < 0)
+                {
+                    response.ErrorMessage = "Please pass student ID";
+                    return response;
+                }
+
                 var existingStudent = _context.Students.Where(f => f.StudentID == studentDTO.StudentID).FirstOrDefault();
 
                 if (existingStudent != null)
@@ -119,6 +125,12 @@ namespace CRUDOperationUsingWEBAPI.Services
             var response = new MainResponse();
             try
             {
+                if (studentDTO.StudentID < 0)
+                {
+                    response.ErrorMessage = "Please pass student ID";
+                    return response;
+                }
+
                 var existingStudent = _context.Students.Where(f => f.StudentID == studentDTO.StudentID).FirstOrDefault();
 
                 if (existingStudent != null)
