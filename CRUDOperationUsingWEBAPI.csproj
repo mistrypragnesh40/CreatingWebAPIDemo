@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <Folder Include="Context\" />
+    <Folder Include="Migrations\" />
+    <Folder Include="Images\" />
   </ItemGroup>
 
 </Project>

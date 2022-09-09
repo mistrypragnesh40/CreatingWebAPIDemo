@@ -20,11 +20,14 @@ namespace CRUDOperationUsingWEBAPI.Controllers
         private readonly UserManager<Users> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
-        public UsersController(UserManager<Users> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public UsersController(UserManager<Users> userManager,
+            IConfiguration configuration, RoleManager<IdentityRole> roleManager, IWebHostEnvironment webHostEnvironment)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _webHostEnvironment = webHostEnvironment;
         }
 
 
@@ -170,8 +173,9 @@ namespace CRUDOperationUsingWEBAPI.Controllers
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Name, $"{user.FirstName} { user.LastName}"),
                     new Claim(ClaimTypes.Email, user.Email),
+                    new Claim("UserAvatar", $"{user.UserAvatar}"),
 
-                };
+            };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -234,6 +238,15 @@ namespace CRUDOperationUsingWEBAPI.Controllers
                 Gender = registerUserDTO.Gender
             };
 
+
+            if (!string.IsNullOrWhiteSpace(registerUserDTO.UserAvatar))
+            {
+                byte[] imgBytes = Convert.FromBase64String(registerUserDTO.UserAvatar);
+                string fileName = $"{Guid.NewGuid()}_{userToBeCreated.FirstName.Trim()}_{userToBeCreated.LastName.Trim()}.jpeg";
+                string avatar = await UploadFile(imgBytes, fileName);
+                userToBeCreated.UserAvatar = avatar;
+            }
+
             var response = await _userManager.CreateAsync(userToBeCreated, registerUserDTO.Password);
             if (response.Succeeded)
             {
@@ -246,6 +259,17 @@ namespace CRUDOperationUsingWEBAPI.Controllers
             {
                 return ErrorResponse.ReturnErrorResponse(response.Errors?.ToString() ?? "");
             }
+        }
+
+        private async Task<string> UploadFile(byte[] bytes, string fileName)
+        {
+            string uploadsFolder = Path.Combine("Images", fileName);
+            Stream stream = new MemoryStream(bytes);
+            using (var ms = new FileStream(uploadsFolder, FileMode.Create))
+            {
+                await stream.CopyToAsync(ms);
+            }
+            return uploadsFolder;
         }
 
         [HttpDelete("DeleteUser")]
